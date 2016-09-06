@@ -17,12 +17,12 @@ public class Receiver {
 
     private static final Logger log = LoggerFactory.getLogger(RandomApplication.class);
 
-    @JmsListener(destination = "mailbox", containerFactory = "myJmsListenerContainerFactory")
-    public void receiveMessage(Email email) {
-        System.out.println("Received <" + email + ">");
-        repository.save(new Customer(email.to, email.message));
-        for (Customer customer : repository.findAll()) {
-            log.info(customer.toString());
-        }
+    @JmsListener(destination = "mojo01", containerFactory = "myJmsListenerContainerFactory")
+    public void receiveMessage(String s) {
+        System.out.println("Received <" + s + ">");
+//        repository.save(new Customer(s + "-to", s + "-msg"));
+//        for (Customer customer : repository.findAll()) {
+//            log.info(customer.toString());
+//        }
     }
 }

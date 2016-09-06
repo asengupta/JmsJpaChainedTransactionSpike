@@ -20,15 +20,8 @@ import javax.jms.ConnectionFactory;
 @SpringBootApplication
 @EnableJms
 public class RandomApplication {
-//    @Bean
-//    public JmsListenerContainerFactory<?> myFactory(ConnectionFactory connectionFactory,
-//                                                    DefaultJmsListenerContainerFactoryConfigurer configurer) {
-//        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-//        // This provides all boot's default to this factory, including the message converter
-//        configurer.configure(factory, connectionFactory);
-//        // You could still override some of Boot's default if necessary.
-//        return factory;
-//    }
+    private static final Logger log = LoggerFactory.getLogger(RandomApplication.class);
+    private static final Logger txLogger = LoggerFactory.getLogger("org.springframework.transaction");
 
     @Bean // Serialize message content to json using TextMessage
     public MessageConverter jacksonJmsMessageConverter() {
@@ -40,12 +33,15 @@ public class RandomApplication {
 
     public static void main(String[] args) {
         ApplicationContext ctx = SpringApplication.run(RandomApplication.class, args);
+        System.out.println("LOLOLOLOLOLOLOLOL");
+//        CustomerRepository repository = ctx.getBean(CustomerRepository.class);
+//        repository.save(new Customer("mojo@thoughtworks.com", "What's going on?"));
+//        for (Customer customer : repository.findAll()) {
+//            log.info(customer.toString());
+//        }
 
-        CustomerRepository repository = ctx.getBean(CustomerRepository.class);
-        System.out.println("Let's inspect the beans provided by Spring Boot:");
-
-        JmsTemplate jmsTemplate = ctx.getBean(JmsTemplate.class);
-        System.out.println("Sending an email message.");
-        jmsTemplate.convertAndSend("mailbox", new Email("info@example.com", "Hello"));
+//        JmsTemplate jmsTemplate = ctx.getBean(JmsTemplate.class);
+//        System.out.println("Sending an email message.");
+//        jmsTemplate.convertAndSend("mailbox", new Email("info@example.com", "Hello"));
     }
 }
