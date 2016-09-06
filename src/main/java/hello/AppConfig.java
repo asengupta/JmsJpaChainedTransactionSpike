@@ -1,6 +1,8 @@
 package hello;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.h2.jdbcx.JdbcDataSource;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.transaction.ChainedTransactionManager;
@@ -10,6 +12,7 @@ import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -37,20 +40,31 @@ public class AppConfig {
     }
 
     @Bean
-    JpaTransactionManager getJpaTransactionManager() {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("PU");
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+            EntityManagerFactoryBuilder builder) {
+        JdbcDataSource dataSource = new JdbcDataSource();
+        dataSource.setURL("jdbc:h2:mem:mojodb");
+        return builder
+                .dataSource(dataSource)
+                .packages(Customer.class)
+                .persistenceUnit("customers")
+                .build();
+    }
+
+    @Bean
+    JpaTransactionManager getJpaTransactionManager(EntityManagerFactory emf) {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager(emf);
         return jpaTransactionManager;
     }
 
     @Bean
-    public JmsListenerContainerFactory<?> myJmsListenerContainerFactory(ActiveMQConnectionFactory connectionFactory) {
+    public JmsListenerContainerFactory<?> myJmsListenerContainerFactory(ActiveMQConnectionFactory connectionFactory, JmsTransactionManager jmsTransactionManager, JpaTransactionManager jpaTransactionManager) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setSessionTransacted(true);
         factory.setConnectionFactory(connectionFactory);
         factory.setCacheLevel(CACHE_CONSUMER);
 
-        ChainedTransactionManager transactionManager = new ChainedTransactionManager(getJmsTransactionManager(connectionFactory), getJpaTransactionManager());
+        ChainedTransactionManager transactionManager = new ChainedTransactionManager(jmsTransactionManager, jpaTransactionManager);
         factory.setTransactionManager(transactionManager);
         return factory;
     }
