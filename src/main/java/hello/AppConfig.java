@@ -1,6 +1,7 @@
 package hello;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.RedeliveryPolicy;
 import org.h2.jdbcx.JdbcDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -31,11 +32,15 @@ public class AppConfig {
 
     @Value("lol")
     public String val;
-    
+
     @Bean
     public ActiveMQConnectionFactory connectionFactory() throws JMSException {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
         connectionFactory.setBrokerURL("tcp://localhost:61616");
+        RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
+        redeliveryPolicy.setMaximumRedeliveries(-1);
+        redeliveryPolicy.setRedeliveryDelay(3000);
+        connectionFactory.setRedeliveryPolicy(redeliveryPolicy);
         connectionFactory.createQueueConnection();
         return connectionFactory;
     }
@@ -43,9 +48,9 @@ public class AppConfig {
     @Bean
     JmsTransactionManager getJmsTransactionManager(ActiveMQConnectionFactory connectionFactory) {
         JmsTransactionManager jmsTransactionManager = new JmsTransactionManager();
-        connectionFactory.getRedeliveryPolicy().setUseExponentialBackOff(true);
-        connectionFactory.getRedeliveryPolicy().setMaximumRedeliveries(5);
-        connectionFactory.getRedeliveryPolicy().setBackOffMultiplier(1);
+//        connectionFactory.getRedeliveryPolicy().setUseExponentialBackOff(true);
+//        connectionFactory.getRedeliveryPolicy().setMaximumRedeliveries(5);
+//        connectionFactory.getRedeliveryPolicy().setBackOffMultiplier(1);
         jmsTransactionManager.setConnectionFactory(connectionFactory);
         return jmsTransactionManager;
     }
@@ -75,7 +80,7 @@ public class AppConfig {
         System.out.println("CREATING A CHAINED TRANSACTION");
         System.out.println("========================================================");
         System.out.println("========================================================");
-        ChainedTransactionManager transactionManager = new ChainedTransactionManager(jmsTransactionManager, jpaTransactionManager);
+        ChainedTransactionManager transactionManager = new ChainedTransactionManager(jmsTransactionManager);
         return transactionManager;
     }
 
@@ -87,9 +92,9 @@ public class AppConfig {
         System.out.println("========================================================");
         System.out.println("========================================================");
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-//        factory.setSessionTransacted(true);
+        factory.setSessionTransacted(true);
         factory.setConnectionFactory(connectionFactory);
-//        factory.setCacheLevel(CACHE_CONSUMER);
+        factory.setCacheLevel(CACHE_CONSUMER);
         factory.setTransactionManager(transactionManager);
         return factory;
     }
