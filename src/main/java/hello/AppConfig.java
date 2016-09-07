@@ -54,9 +54,6 @@ public class AppConfig {
     @Bean
     JmsTransactionManager getJmsTransactionManager(ActiveMQConnectionFactory connectionFactory) {
         JmsTransactionManager jmsTransactionManager = new JmsTransactionManager();
-//        connectionFactory.getRedeliveryPolicy().setUseExponentialBackOff(true);
-//        connectionFactory.getRedeliveryPolicy().setMaximumRedeliveries(5);
-//        connectionFactory.getRedeliveryPolicy().setBackOffMultiplier(1);
         jmsTransactionManager.setConnectionFactory(connectionFactory);
         return jmsTransactionManager;
     }
