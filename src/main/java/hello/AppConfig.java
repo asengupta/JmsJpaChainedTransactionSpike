@@ -42,7 +42,10 @@ public class AppConfig {
         connectionFactory.setBrokerURL("tcp://localhost:61616");
         RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
         redeliveryPolicy.setMaximumRedeliveries(-1);
-        redeliveryPolicy.setRedeliveryDelay(3000);
+        redeliveryPolicy.setUseExponentialBackOff(true);
+        redeliveryPolicy.setInitialRedeliveryDelay(2000);
+        redeliveryPolicy.setBackOffMultiplier(1.5);
+//        redeliveryPolicy.setRedeliveryDelay(3000);
         connectionFactory.setRedeliveryPolicy(redeliveryPolicy);
         connectionFactory.createQueueConnection();
         return connectionFactory;
