@@ -24,6 +24,9 @@ import javax.jms.MessageListener;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.springframework.jms.listener.DefaultMessageListenerContainer.CACHE_CONSUMER;
 
 @Configuration
@@ -59,17 +62,29 @@ public class AppConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             EntityManagerFactoryBuilder builder) {
         JdbcDataSource dataSource = new JdbcDataSource();
-        dataSource.setURL("jdbc:h2:mem:mojodb");
+        dataSource.setURL("jdbc:h2:mem:mojodb;DB_CLOSE_DELAY=-1");
+        Map<String, String> props = new HashMap<>();
+        props.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+        props.put("hibernate.show_sql", "true");
+        props.put("connection.driver_class", "org.h2.Driver");
+        props.put("hibernate.hbm2ddl.auto", "create-drop");
+
         return builder
                 .dataSource(dataSource)
-                .packages(Customer.class)
+                .packages(Customer.class, Email.class)
                 .persistenceUnit("customers")
+                .properties(props)
                 .build();
     }
 
     @Bean
     JpaTransactionManager getJpaTransactionManager(EntityManagerFactory emf) {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager(emf);
+        System.out.println("========================================================");
+        System.out.println("========================================================");
+        System.out.println("CREATING A JPA TRANSACTION MANAGER");
+        System.out.println("========================================================");
+        System.out.println("========================================================");
         return jpaTransactionManager;
     }
 
