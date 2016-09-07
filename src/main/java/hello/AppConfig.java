@@ -80,7 +80,7 @@ public class AppConfig {
         System.out.println("CREATING A CHAINED TRANSACTION");
         System.out.println("========================================================");
         System.out.println("========================================================");
-        ChainedTransactionManager transactionManager = new ChainedTransactionManager(jmsTransactionManager);
+        ChainedTransactionManager transactionManager = new ChainedTransactionManager(jmsTransactionManager, jpaTransactionManager);
         return transactionManager;
     }
 
