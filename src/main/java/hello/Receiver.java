@@ -17,7 +17,7 @@ public class Receiver {
     @JmsListener(destination = "mojo01", containerFactory = "myJmsListenerContainerFactory")
     public void receiveMessage(String s) {
 //        if (1 == 1) throw new RuntimeException("BAHAHAHAHA");
-        System.out.println("Received <" + s + ">");
+        log.info("Received <" + s + ">");
         customerRepository.save(new Customer(s + "-to", s + "-msg"));
         for (Customer customer : customerRepository.findAll()) {
             log.info(customer.toString());
