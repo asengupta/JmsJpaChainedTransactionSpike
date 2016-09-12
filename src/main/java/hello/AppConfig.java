@@ -62,7 +62,10 @@ public class AppConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             EntityManagerFactoryBuilder builder) {
         JdbcDataSource dataSource = new JdbcDataSource();
-        dataSource.setURL("jdbc:h2:mem:mojodb;DB_CLOSE_DELAY=-1");
+//        dataSource.setURL("jdbc:h2:mem:mojodb;DB_CLOSE_DELAY=-1");
+        dataSource.setURL("jdbc:h2:tcp://localhost/~/test");
+        dataSource.setUser("sa");
+        dataSource.setPassword("");
         Map<String, String> props = new HashMap<>();
         props.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         props.put("hibernate.show_sql", "true");

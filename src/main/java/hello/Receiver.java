@@ -18,6 +18,7 @@ public class Receiver {
     public void receiveMessage(String s) {
 //        if (1 == 1) throw new RuntimeException("BAHAHAHAHA");
         log.info("Received <" + s + ">");
+
         customerRepository.save(new Customer(s + "-to", s + "-msg"));
         for (Customer customer : customerRepository.findAll()) {
             log.info(customer.toString());
