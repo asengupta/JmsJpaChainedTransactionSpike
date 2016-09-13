@@ -17,6 +17,7 @@ import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -51,8 +52,8 @@ public class AppConfig {
         return connectionFactory;
     }
 
-    @Bean
-    JmsTransactionManager getJmsTransactionManager(ActiveMQConnectionFactory connectionFactory) {
+    @Bean(name = "transactionManager")
+    JmsTransactionManager jmsTransactionManager(ActiveMQConnectionFactory connectionFactory) {
         JmsTransactionManager jmsTransactionManager = new JmsTransactionManager();
         jmsTransactionManager.setConnectionFactory(connectionFactory);
         return jmsTransactionManager;
@@ -81,6 +82,11 @@ public class AppConfig {
     }
 
     @Bean
+    TransactionTemplate transactionTemplate(JpaTransactionManager jpaTransactionManager) {
+        return new TransactionTemplate(jpaTransactionManager);
+    }
+
+    @Bean
     JpaTransactionManager getJpaTransactionManager(EntityManagerFactory emf) {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager(emf);
         System.out.println("========================================================");
@@ -92,18 +98,7 @@ public class AppConfig {
     }
 
     @Bean
-    PlatformTransactionManager transactionManager(JmsTransactionManager jmsTransactionManager, JpaTransactionManager jpaTransactionManager) {
-        System.out.println("========================================================");
-        System.out.println("========================================================");
-        System.out.println("CREATING A CHAINED TRANSACTION");
-        System.out.println("========================================================");
-        System.out.println("========================================================");
-        ChainedTransactionManager transactionManager = new ChainedTransactionManager(jmsTransactionManager, jpaTransactionManager);
-        return transactionManager;
-    }
-
-    @Bean
-    public JmsListenerContainerFactory<?> myJmsListenerContainerFactory(ActiveMQConnectionFactory connectionFactory, PlatformTransactionManager transactionManager) {
+    public JmsListenerContainerFactory<?> myJmsListenerContainerFactory(ActiveMQConnectionFactory connectionFactory, JmsTransactionManager jmsTransactionManager) {
         System.out.println("========================================================");
         System.out.println("========================================================");
         System.out.println("CREATING A CONTAINER FACTORY");
@@ -113,7 +108,7 @@ public class AppConfig {
         factory.setSessionTransacted(true);
         factory.setConnectionFactory(connectionFactory);
         factory.setCacheLevel(CACHE_CONSUMER);
-        factory.setTransactionManager(transactionManager);
+        factory.setTransactionManager(jmsTransactionManager);
         return factory;
     }
 }
